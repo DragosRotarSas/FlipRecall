@@ -32,7 +32,11 @@ public class ReviewActivity extends AppCompatActivity {
 
     private boolean isAnswerShown = false;
     private boolean isAdvancing = false;
-    private boolean hasLoadedCards = false;  // Ensure cards are loaded only once
+    private boolean hasLoadedCards = false;
+
+    // Session counters
+    private int sessionCorrectCount = 0;
+    private int sessionIncorrectCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +75,6 @@ public class ReviewActivity extends AppCompatActivity {
     private void loadCards() {
         viewModel.getCardsForReview(deckId).observe(this, cardList -> {
             if (cardList != null && !cardList.isEmpty()) {
-                // Initialize only once to keep a stable snapshot
                 if (!hasLoadedCards) {
                     cards = cardList;
                     hasLoadedCards = true;
@@ -89,12 +92,13 @@ public class ReviewActivity extends AppCompatActivity {
         Card card = cards.get(currentCardIndex);
         if (isCorrect) {
             card.incrementCorrectCount();
+            sessionCorrectCount++;
         } else {
             card.incrementIncorrectCount();
+            sessionIncorrectCount++;
         }
         viewModel.updateCard(card);
 
-        // Reveal answer and show Next button
         isAnswerShown = true;
         answerText.setVisibility(View.VISIBLE);
         correctButton.setVisibility(View.GONE);
@@ -122,7 +126,6 @@ public class ReviewActivity extends AppCompatActivity {
         questionText.setText(card.getQuestion());
         answerText.setText(card.getAnswer());
 
-        // Reset UI for the new question
         isAnswerShown = false;
         answerText.setVisibility(View.GONE);
         correctButton.setVisibility(View.VISIBLE);
@@ -131,9 +134,13 @@ public class ReviewActivity extends AppCompatActivity {
     }
 
     private void showReviewCompleteDialog() {
+        String message = "Review Complete.\n" +
+                "You have reviewed all cards in this deck.\n\n" +
+                sessionCorrectCount + " answers were correct.\n" +
+                sessionIncorrectCount + " answers were incorrect.";
         new AlertDialog.Builder(this)
                 .setTitle("Review Complete")
-                .setMessage("You have reviewed all cards in this deck.")
+                .setMessage(message)
                 .setPositiveButton("OK", (dialog, which) -> finish())
                 .setCancelable(false)
                 .show();
@@ -164,8 +171,10 @@ public class ReviewActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Reset flags to ensure clean state if recreated
+        // Reset for clean state on recreation
         isAdvancing = false;
         hasLoadedCards = false;
+        sessionCorrectCount = 0;
+        sessionIncorrectCount = 0;
     }
 }

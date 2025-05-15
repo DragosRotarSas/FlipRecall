@@ -27,4 +27,10 @@ public interface DeckDao {
     
     @Query("SELECT * FROM decks WHERE id = :id")
     LiveData<Deck> getDeckById(long id);
+
+    @Query("SELECT * FROM decks WHERE folderId = :folderId")
+    List<Deck> getDecksByFolderIdSync(long folderId);
+
+    @Delete
+    void deleteDeck(Deck deck);
 } 

@@ -82,4 +82,26 @@ public class FlashCardViewModel extends AndroidViewModel {
     public LiveData<List<Card>> getCardsForReview(long deckId) {
         return repository.getCardsForReview(deckId);
     }
+
+    public void deleteFolderRecursively(Folder folder) {
+        // run on background thread
+        new Thread(() -> deleteRecursively(folder.getId())).start();
+    }
+
+    private void deleteRecursively(long folderId) {
+        // 1) delete all decks in this folder
+        List<Deck> decks = repository.getDecksByFolderIdSync(folderId);
+        for (Deck d : decks) {
+            repository.deleteDeck(d);
+        }
+
+        // 2) recurse into subfolders
+        List<Folder> children = repository.getFoldersByParentIdSync(folderId);
+        for (Folder child : children) {
+            deleteRecursively(child.getId());
+        }
+
+        // 3) finally delete this folder
+        repository.deleteFolderById(folderId);
+    }
 } 

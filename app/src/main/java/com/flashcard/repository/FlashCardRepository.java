@@ -63,10 +63,11 @@ public class FlashCardRepository {
     public void updateDeck(Deck deck) {
         executorService.execute(() -> deckDao.update(deck));
     }
-    
+
+    /*
     public void deleteDeck(Deck deck) {
         executorService.execute(() -> deckDao.delete(deck));
-    }
+    }*/
     
     public LiveData<List<Deck>> getDecksByFolderId(long folderId) {
         return deckDao.getDecksByFolderId(folderId);
@@ -91,5 +92,21 @@ public class FlashCardRepository {
     
     public LiveData<List<Card>> getCardsForReview(long deckId) {
         return cardDao.getCardsForReview(deckId);
+    }
+
+    public List<Folder> getFoldersByParentIdSync(long parentId) {
+        return folderDao.getFoldersByParentIdSync(parentId);
+    }
+
+    public void deleteFolderById(long folderId) {
+        folderDao.deleteFolderById(folderId);
+    }
+
+    public List<Deck> getDecksByFolderIdSync(long folderId) {
+        return deckDao.getDecksByFolderIdSync(folderId);
+    }
+
+    public void deleteDeck(Deck deck) {
+        deckDao.deleteDeck(deck);
     }
 } 

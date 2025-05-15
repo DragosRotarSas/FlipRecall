@@ -30,4 +30,10 @@ public interface FolderDao {
     
     @Query("SELECT * FROM folders WHERE parentFolderId = 0")
     LiveData<List<Folder>> getRootFolders();
+
+    @Query("SELECT * FROM folders WHERE parentFolderId = :parentId")
+    List<Folder> getFoldersByParentIdSync(long parentId);
+
+    @Query("DELETE FROM folders WHERE id = :folderId")
+    void deleteFolderById(long folderId);
 } 
